@@ -8,7 +8,8 @@ import jakarta.persistence.Id;
 @Entity
 public class Organization {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
     String name;
     String type;
     String address;

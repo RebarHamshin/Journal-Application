@@ -7,8 +7,10 @@ import java.time.LocalDateTime;
 @Entity
 public class Observation {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
-    @Column(nullable = false) Long patientId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+    @Column(nullable = false)
+    Long patientId;
     String type;
     String value;
     String unit;
