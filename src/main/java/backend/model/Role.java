@@ -1,4 +1,4 @@
-package com.example.JournalApplication.model;
+package backend.model;
 
 public enum Role {
     PATIENT,

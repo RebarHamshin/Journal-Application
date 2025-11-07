@@ -1,4 +1,4 @@
-package com.example.JournalApplication.model;
+package backend.model;
 
 import jakarta.persistence.*;
 
@@ -17,4 +17,8 @@ public class User {
 
     Long patientId;
     Long practitionerId;
+    public Long getId() { return id; }
+    public String getUsername() { return username; }
+    public void setUsername(String u) { this.username = u; }
+
 }

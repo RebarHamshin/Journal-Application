@@ -1,16 +1,20 @@
-package com.example.JournalApplication.model;
+package backend.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import java.time.LocalDateTime;
+
 @Entity
-public class Practitioner {
+public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    String name;
-    String title;
-    Long organizationId;
+    Long senderUserId;
+    Long receiverUserId;
+    String content;
+    LocalDateTime sentAt;
+    boolean read;
 }

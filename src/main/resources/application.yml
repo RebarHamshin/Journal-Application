@@ -1,7 +1,7 @@
 spring:
   datasource:
     url: jdbc:sqlserver://localhost:1433;databaseName=journal;encrypt=true;trustServerCertificate=true
-    username: springuser
+    username: sa
     password: YourStrong!Passw0rd
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
