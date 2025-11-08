@@ -37,6 +37,8 @@ services:
     depends_on:
       db:
         condition: service_healthy    # Runs only after SQL Server is ready
+    environment: # <-- add this block
+      - SA_PASSWORD=${SA_PASSWORD}
     entrypoint:
       [
         "/bin/sh",
@@ -59,7 +61,9 @@ services:
       init-db:
         condition: service_completed_successfully  # Waits for DB creation
     environment:
-      - SPRING_PROFILES_ACTIVE=docker # Activates the 'docker' Spring profile
+      - SPRING_PROFILES_ACTIVE=docker
+      - SA_PASSWORD=${SA_PASSWORD}
+      # Activates the 'docker' Spring profile
       # - SPRING_DATASOURCE_URL=jdbc:sqlserver://db:1433;databaseName=journal;encrypt=false;trustServerCertificate=true
       # - SPRING_DATASOURCE_USERNAME=sa
       # - SPRING_DATASOURCE_PASSWORD=${SA_PASSWORD}

@@ -1,6 +1,8 @@
 package backend.controller;
 
+import backend.auth.SessionManager;
 import backend.dto.UserDto;
+import backend.model.Role;
 import backend.model.User;
 import backend.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -82,4 +84,16 @@ public class UserController {
             @NotBlank String username,
             String password
     ) {}
+
+    private User requireUser(String token) {
+        Long uid = SessionManager.resolveUserId(token);
+        if (uid == null) throw new RuntimeException("401 Unauthorized");
+        return repo.findById(uid).orElseThrow(() -> new RuntimeException("401 Unauthorized"));
+    }
+
+    private void requireDoctorOrStaff(User u) {
+        if (u.getRole() != Role.DOCTOR && u.getRole() != Role.STAFF)
+            throw new RuntimeException("403 Forbidden");
+    }
+
 }
