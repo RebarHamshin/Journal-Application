@@ -7,8 +7,8 @@ export default function UserList() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const base = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        const apiUrl = `${base}/api/users`;
+        const API_BASE = '/api';
+        const apiUrl = `${API_BASE}/users`;
         console.log("Fetching:", apiUrl);      // <-- see the exact URL
 
         fetch(apiUrl)
