@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import "../css-styles/Login.css";
 /**
  * The Login component:
  *  - Displays a simple login form
@@ -79,7 +79,7 @@ export default function Login({ onLogin }) {
      * an optional error message, and a login button.
      */
     return (
-        <form onSubmit={handleSubmit}>
+        <form className="login-form" onSubmit={handleSubmit}>
             <input
                 value={username}
                 onChange={(e) => setU(e.target.value)}

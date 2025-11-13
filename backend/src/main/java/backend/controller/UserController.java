@@ -40,7 +40,6 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // POST /api/users -> 201 Created with Location and UserDto
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody CreateUserRequest req) {
         if (repo.existsByUsername(req.username())) {
@@ -49,9 +48,7 @@ public class UserController {
 
         User u = new User();
         u.setUsername(req.username());
-        // If you want to persist passwords now, ensure you have a setter on the entity.
-        // TODO: hash the password before storing (e.g., BCrypt). Avoid storing plain text.
-        // u.setPassword(passwordEncoder.encode(req.password()));
+
 
         User saved = repo.save(u);
 

@@ -14,7 +14,7 @@ function App() {
         return <Login onLogin={setMe} />; //If not gives the login page
     }
 
-    // Gives this if logged in (if me==true)
+    // Gives this if logged in (if me==notNull)
     return (
         <div style={{ fontFamily: "system-ui", padding: 16 }}>
             <header style={{ display: "flex", gap: 12, alignItems: "center" }}>

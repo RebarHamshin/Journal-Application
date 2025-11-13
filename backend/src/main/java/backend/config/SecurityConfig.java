@@ -11,11 +11,11 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // allow POST/PUT without CSRF tokens
+                .csrf(csrf -> csrf.disable()) // allow POST/PUT w
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()  // register/login/me/logout open
+                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/actuator/**").permitAll()
-                        .anyRequest().permitAll() // <-- keep it simple for the lab; tighten later if you want
+                        .anyRequest().permitAll()
                 );
         return http.build();
     }
