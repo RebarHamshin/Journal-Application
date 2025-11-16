@@ -34,6 +34,15 @@ export const AuthApi = {
             if (!r.ok) throw new Error(await r.text());
             return r.json();
         }),
+    register: (payload) =>
+        fetch(`/api/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        }).then(async (r) => {
+            if (!r.ok) throw new Error(await r.text());
+            return r.json(); // { id, username, role }
+        }),
 };
 
 // Helper to automatically add X-Auth
@@ -43,3 +52,4 @@ export async function authFetch(path, options = {}) {
     if (token) headers.set("X-Auth", token);
     return fetch(`${API_BASE}${path}`, { ...options, headers });
 }
+

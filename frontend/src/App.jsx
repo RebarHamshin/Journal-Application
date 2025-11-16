@@ -1,29 +1,29 @@
 import { useEffect, useState } from "react";
 import UserList from "./components/UserList";
 import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
 import { currentUser, clearSession } from "./api.js";
 
-function App() {
+export default function App() {
     const [me, setMe] = useState(null);
+    const [mode, setMode] = useState("login"); // 'login' | 'register'
 
     useEffect(() => {
-        setMe(currentUser()); // Sets me as currentUser (api.js)
-    }, []); // Empty dependencyList - run this once
+        setMe(currentUser());
+    }, []);
 
-    if (!me) { // Checks if logged in or not
-        return <Login onLogin={setMe} />; //If not gives the login page
+    if (!me) {
+        return mode === "register"
+            ? <Register onDone={() => setMode("login")} />
+            : <Login onLogin={setMe} onShowRegister={() => setMode("register")} />;
     }
 
-    // Gives this if logged in (if me==notNull)
     return (
         <div style={{ fontFamily: "system-ui", padding: 16 }}>
             <header style={{ display: "flex", gap: 12, alignItems: "center" }}>
                 <h1>Journal System Demo</h1>
                 <span style={{ opacity: 0.7 }}>Inloggad som: {me.username} ({me.role})</span>
-                <button
-                    onClick={() => { clearSession(); setMe(null); }}
-                    style={{ marginLeft: "auto" }}
-                >
+                <button onClick={() => { clearSession(); setMe(null); setMode("login"); }} style={{ marginLeft: "auto" }}>
                     Logga ut
                 </button>
             </header>
@@ -32,5 +32,3 @@ function App() {
         </div>
     );
 }
-
-export default App;

@@ -20,23 +20,27 @@ public class AuthController {
         this.users = users;
     }
 
-    public record RegisterRequest(String username, String password, String role,
-                                  Long patientId, Long practitionerId) {}
+    public record RegisterRequest(String username, String password, String role) {}
     public record LoginRequest(String username, String password) {}
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
-        if (req.username() == null || req.username().isBlank()) return ResponseEntity.badRequest().body("username required");
-        if (req.password() == null || req.password().isBlank()) return ResponseEntity.badRequest().body("password required");
-        if (req.role() == null) return ResponseEntity.badRequest().body("role required");
-        if (users.existsByUsername(req.username())) return ResponseEntity.badRequest().body("Username exists");
+        if (req.username() == null || req.username().isBlank())
+            return ResponseEntity.badRequest().body("username required");
+        if (req.password() == null || req.password().isBlank())
+            return ResponseEntity.badRequest().body("password required");
+        if (req.role() == null)
+            return ResponseEntity.badRequest().body("role required");
+        if (users.existsByUsername(req.username()))
+            return ResponseEntity.badRequest().body("Username exists");
 
         User u = new User();
         u.setUsername(req.username());
-        u.setPassword(req.password()); // plain text (ok for lab)
+        u.setPassword(req.password());
         u.setRole(Role.valueOf(req.role().toUpperCase())); // PATIENT/DOCTOR/STAFF
-        u.setPatientId(req.patientId());
-        u.setPractitionerId(req.practitionerId());
+        u.setPatientId(null);
+        u.setPractitionerId(null);
+
         users.save(u);
 
         return ResponseEntity.ok(Map.of(
