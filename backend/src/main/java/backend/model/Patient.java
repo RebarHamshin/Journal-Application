@@ -13,4 +13,16 @@ public class Patient {
     String personnummer;
     String name;
     String contactInfo;
+    public long getId()
+    {
+        return id;
+    }
+
+    public void setName(String username) {
+        this.name = username;
+    }
+
+    public void setPersonnummer(String personnummer) {
+        this.personnummer = personnummer;
+    }
 }

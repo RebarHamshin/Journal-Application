@@ -1,55 +1,89 @@
-const API_BASE = "/api"; //Nginx in docker sends all api calls to backend
+// src/api.js
 
-export function setSession({ token, user }) {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-}
-export function clearSession() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-}
+// --- Session helpers (används i App.jsx) ---
+
 export function currentUser() {
     const raw = localStorage.getItem("user");
-    return raw ? JSON.parse(raw) : null;
-}
-export function getToken() {
-    return localStorage.getItem("token");
+    if (!raw) return null;
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return null;
+    }
 }
 
-// Auth endpoints
+export function clearSession() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+}
+
+// --- authFetch: gemensam helper som lägger på X-Auth-token ---
+
+export async function authFetch(path, options = {}) {
+    const token = localStorage.getItem("token");
+
+    const headers = {
+        ...(options.headers || {}),
+    };
+    if (token) {
+        headers["X-Auth"] = token;
+    }
+
+    const res = await fetch(path, { ...options, headers });
+
+    if (!res.ok) {
+        // kasta texten som felmeddelande
+        throw new Error(await res.text());
+    }
+
+    // Försök parsa JSON, annars returnera rå text
+    const text = await res.text();
+    if (!text) return null;
+    try {
+        return JSON.parse(text);
+    } catch {
+        return text;
+    }
+}
+
+// --- Auth API (register m.m.) ---
+
 export const AuthApi = {
-    login: (username, password) =>
-        fetch(`${API_BASE}/auth/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password }),
-        }).then(async (r) => {
-            if (!r.ok) throw new Error(await r.text());
-            return r.json(); // { token, user: {...} }
-        }),
-    me: () =>
-        fetch(`${API_BASE}/auth/me`, {
-            headers: { "X-Auth": getToken() || "" },
-        }).then(async (r) => {
-            if (!r.ok) throw new Error(await r.text());
-            return r.json();
-        }),
-    register: (payload) =>
-        fetch(`/api/auth/register`, {
+    async register(payload) {
+        const res = await fetch("/api/auth/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
-        }).then(async (r) => {
-            if (!r.ok) throw new Error(await r.text());
-            return r.json(); // { id, username, role }
-        }),
+        });
+        if (!res.ok) {
+            throw new Error(await res.text());
+        }
+        return res.json(); // { id, username, role, patientId }
+    },
+
+    async me() {
+        const token = localStorage.getItem("token");
+        if (!token) return null;
+
+        const res = await fetch("/api/auth/me", {
+            headers: { "X-Auth": token },
+        });
+        if (!res.ok) return null;
+        return res.json();
+    },
 };
 
-// Helper to automatically add X-Auth
-export async function authFetch(path, options = {}) {
-    const headers = new Headers(options.headers || {});
-    const token = getToken();
-    if (token) headers.set("X-Auth", token);
-    return fetch(`${API_BASE}${path}`, { ...options, headers });
-}
+// --- Journal API (MyJournal + PatientRecordViewer) ---
 
+export const JournalApi = {
+    // Patient ser sin egen journal
+    getMyRecord() {
+        return authFetch("/api/patients/me");
+    },
+
+    // Läkare/personal ser journal via patientnamn
+    getRecordByName(name) {
+        const encoded = encodeURIComponent(name);
+        return authFetch(`/api/patients/${encoded}/full`);
+    },
+};
