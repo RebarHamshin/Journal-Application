@@ -5,10 +5,12 @@ import { currentUser, clearSession } from "./api.js";
 import PatientNotesPage from "./pages/PatientNotes.jsx";
 import PatientRecordViewer from "./components/PatientRecordViewer.jsx";
 import MyJournal from "./components/MyJournal.jsx";
+import MessagesPage from "./pages/MessagesPage.jsx";
 
 export default function App() {
     const [me, setMe] = useState(null);
-    const [mode, setMode] = useState("login"); // 'login' | 'register'
+    const [mode, setMode] = useState("login");   // 'login' | 'register'
+    const [view, setView] = useState("journal"); // 'journal' | 'messages'
 
     useEffect(() => {
         setMe(currentUser());
@@ -31,27 +33,52 @@ export default function App() {
                     Inloggad som: {me.username} ({me.role})
                 </span>
 
-                <button
-                    onClick={() => { clearSession(); setMe(null); setMode("login"); }}
-                    style={{ marginLeft: "auto" }}
-                >
-                    Logga ut
-                </button>
+                <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+                    <button
+                        type="button"
+                        onClick={() => setView("journal")}
+                        style={{ fontWeight: view === "journal" ? "bold" : "normal" }}
+                    >
+                        Journal
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setView("messages")}
+                        style={{ fontWeight: view === "messages" ? "bold" : "normal" }}
+                    >
+                        Meddelanden
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            clearSession();
+                            setMe(null);
+                            setMode("login");
+                            setView("journal");
+                        }}
+                    >
+                        Logga ut
+                    </button>
+                </div>
             </header>
+            {view === "journal" ? (
+                isDoctorOrStaff ? (
+                    <>
+                        {/* Läkare/personal: skriva noteringar/diagnoser */}
+                        <PatientNotesPage />
 
-            {isDoctorOrStaff ? (
-                <>
-                    {/* Läkare/personal: skriva noteringar/diagnoser */}
-                    <PatientNotesPage />
-
-                    {/* Läkare/personal: visa journal för godtycklig patient */}
-                    <PatientRecordViewer />
-                </>
+                        {/* Läkare/personal: visa journal för valfri patient via namn */}
+                        <PatientRecordViewer />
+                    </>
+                ) : (
+                    <>
+                        {/* Patient: se sin egen journal */}
+                        <MyJournal />
+                    </>
+                )
             ) : (
-                <>
-                    {/* Patient: se sin egen journal */}
-                    <MyJournal />
-                </>
+                // Meddelandesida för alla roller
+                <MessagesPage me={me} />
             )}
         </div>
     );

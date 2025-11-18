@@ -87,3 +87,20 @@ export const JournalApi = {
         return authFetch(`/api/patients/${encoded}/full`);
     },
 };
+export const MessageApi = {
+    getContacts() {
+        return authFetch("/api/messages/contacts");
+    },
+
+    getThread(otherId) {
+        return authFetch(`/api/messages/thread/${otherId}`);
+    },
+
+    send(payload) {
+        return authFetch("/api/messages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+    },
+};
