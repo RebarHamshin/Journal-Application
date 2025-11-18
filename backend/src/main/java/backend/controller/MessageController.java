@@ -14,6 +14,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Controller for handling message operations between users in the system.
+ * Provides endpoints for managing contacts, message threads, and sending messages.
+ * Supports communication between patients and medical staff (doctors and staff members).
+ * Cross-origin requests are allowed from http://localhost:5173 for development purposes.
+ */
 @RestController
 @RequestMapping("/api/messages")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -22,6 +28,12 @@ public class MessageController {
     private final MessageRepository messages;
     private final UserRepository users;
 
+    /**
+     * Constructor for MessageController with dependency injection.
+     *
+     * @param messages MessageRepository for accessing message data
+     * @param users UserRepository for accessing user data
+     */
     public MessageController(MessageRepository messages, UserRepository users) {
         this.messages = messages;
         this.users = users;
@@ -38,8 +50,14 @@ public class MessageController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid session"));
     }
 
+    /**
+     * Data transfer object representing a contact user.
+     */
     private record ContactDto(Long id, String username, String role) {}
 
+    /**
+     * Data transfer object representing a message with sender and receiver information.
+     */
     private record MessageDto(
             Long id,
             Long senderId,
@@ -65,8 +83,19 @@ public class MessageController {
     }
 
     // ===========================
-    // 1) Hämta kontakter att skriva till
+    // 1) Get contacts to message with
     // ===========================
+
+    /**
+     * Retrieves a list of contacts that the current user can message with.
+     * The available contacts depend on the user's role:
+     * - Patients can message with all doctors and staff members
+     * - Doctors and staff can message with all patients
+     *
+     * @param token Authentication token from the X-Auth header
+     * @return ResponseEntity with a list of ContactDto objects representing available contacts
+     * @throws ResponseStatusException with 401 status if user is not authenticated
+     */
     @GetMapping("/contacts")
     public ResponseEntity<?> getContacts(
             @RequestHeader(value = "X-Auth", required = false) String token) {
@@ -93,6 +122,16 @@ public class MessageController {
         return ResponseEntity.ok(list);
     }
 
+    /**
+     * Retrieves the complete message thread between the current user and another user.
+     * Returns all messages exchanged between the two users, sorted by timestamp in ascending order.
+     *
+     * @param token Authentication token from the X-Auth header
+     * @param otherId The ID of the other user in the conversation
+     * @return ResponseEntity with a list of MessageDto objects representing the message thread
+     * @throws ResponseStatusException with 401 status if user is not authenticated
+     * @throws ResponseStatusException with 404 status if the other user is not found
+     */
     @GetMapping("/thread/{otherId}")
     public ResponseEntity<?> getThread(
             @RequestHeader(value = "X-Auth", required = false) String token,
@@ -125,10 +164,26 @@ public class MessageController {
     }
 
     // ===========================
-    // 3) Skicka meddelande
+    // 3) Send message
     // ===========================
+
+    /**
+     * Record representing the data required to send a new message.
+     */
     public record SendMessageRequest(Long receiverId, String content) {}
 
+    /**
+     * Sends a new message from the current user to another user.
+     * Validates that the receiver exists and that the message content is not empty.
+     * Prevents users from sending messages to themselves.
+     *
+     * @param token Authentication token from the X-Auth header
+     * @param req SendMessageRequest containing receiverId and message content
+     * @return ResponseEntity with the sent message as MessageDto
+     * @throws ResponseStatusException with 401 status if user is not authenticated
+     * @throws ResponseStatusException with 400 status for invalid request (empty content, self-message, etc.)
+     * @throws ResponseStatusException with 404 status if the receiver user is not found
+     */
     @PostMapping
     public ResponseEntity<?> send(
             @RequestHeader(value = "X-Auth", required = false) String token,

@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * Controller for handling user authentication operations including registration, login, and session management.
+ * Provides endpoints for user registration, login, logout, and checking current session information.
+ */
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -19,14 +23,34 @@ public class AuthController {
     private final UserRepository users;
     private final PatientRepository patients;
 
+    /**
+     * Constructor for AuthController with dependency injection.
+     *
+     * @param users UserRepository for accessing user data
+     * @param patients PatientRepository for accessing patient data
+     */
     public AuthController(UserRepository users, PatientRepository patients) {
         this.users = users;
         this.patients = patients;
     }
 
+    /**
+     * Record representing the data required for user registration.
+     */
     public record RegisterRequest(String username, String password, String role) {}
+
+    /**
+     * Record representing the data required for user login.
+     */
     public record LoginRequest(String username, String password) {}
 
+    /**
+     * Registers a new user in the system.
+     * Creates a new user account and if the role is PATIENT, also creates a corresponding patient record.
+     *
+     * @param req RegisterRequest containing username, password, and role
+     * @return ResponseEntity with user details including ID, username, role, and patientId (if applicable)
+     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
         // valideringarna som du redan har...
@@ -54,6 +78,14 @@ public class AuthController {
         ));
     }
 
+    /**
+     * Authenticates a user and creates a session.
+     * Verifies username and password, then issues an authentication token for valid credentials.
+     *
+     * @param req LoginRequest containing username and password
+     * @return ResponseEntity with authentication token and user details if successful,
+     *         or 401 status with error message if credentials are invalid
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
         var u = users.findByUsername(req.username()).orElse(null);
@@ -76,7 +108,14 @@ public class AuthController {
         return ResponseEntity.ok(resp);
     }
 
-
+    /**
+     * Returns information about the currently authenticated user.
+     * Validates the session token and returns user details if the session is valid.
+     *
+     * @param token Authentication token from the X-Auth header
+     * @return ResponseEntity with user details if session is valid,
+     *         or 401 status with error message if token is invalid or expired
+     */
     @GetMapping("/me")
     public ResponseEntity<?> me(@RequestHeader(value = "X-Auth", required = false) String token) {
         Long uid = SessionManager.resolveUserId(token);
@@ -92,6 +131,12 @@ public class AuthController {
         ));
     }
 
+    /**
+     * Logs out the current user by revoking their session token.
+     *
+     * @param token Authentication token from the X-Auth header
+     * @return ResponseEntity with no content (204 status) after successful logout
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader(value = "X-Auth", required = false) String token) {
         SessionManager.revoke(token);

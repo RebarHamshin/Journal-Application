@@ -13,6 +13,12 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Controller for managing patient medical records, encounters, and conditions.
+ * Provides endpoints for healthcare professionals to create patient notes and diagnoses,
+ * and for patients to access their own medical records.
+ * Cross-origin requests are allowed from http://localhost:5173 for development purposes.
+ */
 @RestController
 @RequestMapping("/api/patients")
 @CrossOrigin(origins = "http://localhost:5173") // byt port om din frontend kör annat
@@ -24,6 +30,15 @@ public class PatientRecordController {
     private final UserRepository users;
     private final PractitionerRepository practitioners;
 
+    /**
+     * Constructor for PatientRecordController with dependency injection.
+     *
+     * @param patients PatientRepository for accessing patient data
+     * @param encounters EncounterRepository for accessing encounter/note data
+     * @param conditions ConditionRepository for accessing diagnosis data
+     * @param users UserRepository for accessing user data
+     * @param practitioners PractitionerRepository for accessing practitioner data
+     */
     public PatientRecordController(
             PatientRepository patients,
             EncounterRepository encounters,
@@ -56,11 +71,26 @@ public class PatientRecordController {
     }
 
     // =========================================================
-    // 1) Skapa patientnotering via patient-ID
+    // 1) Create patient note via patient ID
     // =========================================================
 
+    /**
+     * Record representing the data required to create a new patient note.
+     */
     public record CreateNoteRequest(String noteText) {}
 
+    /**
+     * Creates a new medical note/encounter for a specific patient by patient ID.
+     * Restricted to doctors and staff members only.
+     *
+     * @param token Authentication token from the X-Auth header
+     * @param patientId The ID of the patient to add the note for
+     * @param req CreateNoteRequest containing the note text
+     * @return ResponseEntity with encounter details including ID, patientId, notes, and startTime
+     * @throws ResponseStatusException with 401 status if user is not authenticated
+     * @throws ResponseStatusException with 403 status if user is not doctor/staff
+     * @throws ResponseStatusException with 404 status if patient is not found
+     */
     @PostMapping("/{patientId}/notes")
     public ResponseEntity<?> createNote(
             @RequestHeader(value = "X-Auth", required = false) String token,
@@ -90,11 +120,26 @@ public class PatientRecordController {
     }
 
     // =======================================================
-    // 2) Skapa diagnos (Condition)
+    // 2) Create diagnosis (Condition)
     // =======================================================
 
+    /**
+     * Record representing the data required to create a new diagnosis.
+     */
     public record CreateDiagnosisRequest(String code, String display, String onsetDate) {}
 
+    /**
+     * Creates a new medical diagnosis/condition for a specific patient by patient ID.
+     * Restricted to doctors and staff members only.
+     *
+     * @param token Authentication token from the X-Auth header
+     * @param patientId The ID of the patient to add the diagnosis for
+     * @param req CreateDiagnosisRequest containing diagnosis code, display name, and onset date
+     * @return ResponseEntity with condition details including ID, patientId, code, display, and onsetDate
+     * @throws ResponseStatusException with 401 status if user is not authenticated
+     * @throws ResponseStatusException with 403 status if user is not doctor/staff
+     * @throws ResponseStatusException with 404 status if patient is not found
+     */
     @PostMapping("/{patientId}/conditions")
     public ResponseEntity<?> createDiagnosis(
             @RequestHeader(value = "X-Auth", required = false) String token,
@@ -131,11 +176,25 @@ public class PatientRecordController {
     }
 
     // =========================================================
-    // 3) Skapa notering via patientnamn
+    // 3) Create note via patient name
     // =========================================================
 
+    /**
+     * Record representing the data required to create a new patient note using patient name.
+     */
     public record CreateNoteByNameRequest(String patientName, String noteText) {}
 
+    /**
+     * Creates a new medical note/encounter for a patient by patient name instead of ID.
+     * Restricted to doctors and staff members only.
+     *
+     * @param token Authentication token from the X-Auth header
+     * @param req CreateNoteByNameRequest containing patient name and note text
+     * @return ResponseEntity with encounter details including ID, patientId, notes, and startTime
+     * @throws ResponseStatusException with 401 status if user is not authenticated
+     * @throws ResponseStatusException with 403 status if user is not doctor/staff
+     * @throws ResponseStatusException with 404 status if patient is not found
+     */
     @PostMapping("/notes/by-name")
     public ResponseEntity<?> createNoteByName(
             @RequestHeader(value = "X-Auth", required = false) String token,
@@ -164,11 +223,25 @@ public class PatientRecordController {
     }
 
     // =========================================================
-    // 4) Skapa diagnos via patientnamn
+    // 4) Create diagnosis via patient name
     // =========================================================
 
+    /**
+     * Record representing the data required to create a new diagnosis using patient name.
+     */
     public record CreateDiagnosisByNameRequest(String patientName, String code, String display, String onsetDate) {}
 
+    /**
+     * Creates a new medical diagnosis/condition for a patient by patient name instead of ID.
+     * Restricted to doctors and staff members only.
+     *
+     * @param token Authentication token from the X-Auth header
+     * @param req CreateDiagnosisByNameRequest containing patient name, diagnosis code, display name, and onset date
+     * @return ResponseEntity with condition details including ID, patientId, code, display, and onsetDate
+     * @throws ResponseStatusException with 401 status if user is not authenticated
+     * @throws ResponseStatusException with 403 status if user is not doctor/staff
+     * @throws ResponseStatusException with 404 status if patient is not found
+     */
     @PostMapping("/conditions/by-name")
     public ResponseEntity<?> createDiagnosisByName(
             @RequestHeader(value = "X-Auth", required = false) String token,
@@ -202,12 +275,28 @@ public class PatientRecordController {
         resp.put("onsetDate", saved.getOnsetDate());
         return ResponseEntity.ok(resp);
     }
+
+    /**
+     * Record representing a complete patient summary including patient details, notes, and conditions.
+     */
     public record PatientSummaryResponse(
             Patient patient,
             java.util.List<Encounter> notes,
             java.util.List<Condition> conditions
     ) {}
 
+    /**
+     * Retrieves the complete medical record for a specific patient by patient name.
+     * Includes patient details, all medical notes/encounters, and all diagnoses/conditions.
+     * Restricted to doctors and staff members only.
+     *
+     * @param token Authentication token from the X-Auth header
+     * @param patientName The name of the patient to retrieve the record for
+     * @return ResponseEntity with PatientSummaryResponse containing patient, notes, and conditions
+     * @throws ResponseStatusException with 401 status if user is not authenticated
+     * @throws ResponseStatusException with 403 status if user is not doctor/staff
+     * @throws ResponseStatusException with 404 status if patient is not found
+     */
     @GetMapping("/{patientName}/full")
     public ResponseEntity<?> getFullRecordForDoctor(
             @RequestHeader(value = "X-Auth", required = false) String token,
@@ -225,6 +314,17 @@ public class PatientRecordController {
         return ResponseEntity.ok(new PatientSummaryResponse(patient, notes, conds));
     }
 
+    /**
+     * Retrieves the current user's own complete medical record.
+     * Available only to patients and returns their own patient data, notes, and conditions.
+     *
+     * @param token Authentication token from the X-Auth header
+     * @return ResponseEntity with PatientSummaryResponse containing the patient's own medical record
+     * @throws ResponseStatusException with 401 status if user is not authenticated
+     * @throws ResponseStatusException with 403 status if user is not a patient
+     * @throws ResponseStatusException with 400 status if no patient is linked to the user
+     * @throws ResponseStatusException with 404 status if patient record is not found
+     */
     @GetMapping("/me")
     public ResponseEntity<?> getMyRecord(
             @RequestHeader(value = "X-Auth", required = false) String token
@@ -245,5 +345,4 @@ public class PatientRecordController {
 
         return ResponseEntity.ok(new PatientSummaryResponse(patient, notes, conds));
     }
-
 }
