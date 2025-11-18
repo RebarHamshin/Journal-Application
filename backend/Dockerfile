@@ -1,16 +1,12 @@
-# -------------------------------------------------------------
-# Build stage
-# Uses Maven with Java 21 to compile and package the Spring app
-# -------------------------------------------------------------
+
 FROM maven:3.9-eclipse-temurin-21 AS build
 
-# Set working directory inside the container
 WORKDIR /app
 
 # Copy Maven descriptor to cache dependencies separately
 COPY pom.xml .
 
-# Download dependencies (offline mode preparation)
+# Download dependencies
 RUN mvn -q -DskipTests dependency:go-offline
 
 # Copy source code into the container
@@ -19,11 +15,9 @@ COPY src ./src
 # Build the application JAR file
 RUN mvn -q -DskipTests package
 
-
-# -------------------------------------------------------------
 # Runtime stage
 # Uses a lightweight Java runtime to run the built application
-# -------------------------------------------------------------
+
 FROM eclipse-temurin:21-jre
 
 # Set working directory for runtime container

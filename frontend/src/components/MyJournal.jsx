@@ -36,7 +36,6 @@ export default function MyJournal() {
 
             <div style={{ marginBottom: 16 }}>
                 <h3>Patientinformation</h3>
-                <p><strong>Namn:</strong> {patient.name}</p>
                 {patient.personnummer && <p><strong>Personnummer:</strong> {patient.personnummer}</p>}
                 {patient.birthDate && <p><strong>Födelsedatum:</strong> {patient.birthDate}</p>}
                 {patient.gender && <p><strong>Kön:</strong> {patient.gender}</p>}
