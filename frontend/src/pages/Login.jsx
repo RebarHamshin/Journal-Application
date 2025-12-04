@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../css-styles/Login.css";
+import { AuthApi } from "../api.js";
 
 export default function Login({ onLogin, onShowRegister }) {
     const [username, setU] = useState("");
@@ -9,24 +10,24 @@ export default function Login({ onLogin, onShowRegister }) {
     async function handleSubmit(e) {
         e.preventDefault();
         setError("");
+        setLoading(true);
 
         try {
-            const res = await fetch("/api/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password }),
-            });
+            const data = await AuthApi.login({ username, password });
 
-            if (!res.ok) throw new Error(await res.text());
-
-            const data = await res.json();
+            // spara i localStorage som tidigare
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
-            onLogin?.(data.user);
+
+            onLogin(data.user);     // talar om för App.jsx att vi är inloggade
+            navigate("/");
         } catch (err) {
-            setError(err.message || "Login failed");
+            setError(err.message || "Inloggning misslyckades");
+        } finally {
+            setLoading(false);
         }
     }
+
 
     return (
         <div style={{ maxWidth: 360, margin: "4rem auto", fontFamily: "system-ui" }}>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { authFetch, PATIENT_BASE } from "../api.js";
 
 export default function PatientNotesPage() {
     const [patientName, setPatientName] = useState("");
@@ -8,27 +9,23 @@ export default function PatientNotesPage() {
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
 
-    const token = localStorage.getItem("token");
-
     async function createNote(e) {
         e.preventDefault();
         setError("");
         setMessage("");
 
         try {
-            const res = await fetch(`/api/patients/notes/by-name`, {
+            await authFetch(`${PATIENT_BASE}/api/patients/notes/by-name`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-Auth": token,
                 },
                 body: JSON.stringify({
-                    patientName,   // <-- viktigt
+                    patientName,
                     noteText,
                 }),
             });
-            if (!res.ok) throw new Error(await res.text());
-            await res.json();
+
             setMessage("Note saved!");
             setNoteText("");
         } catch (err) {
@@ -42,21 +39,19 @@ export default function PatientNotesPage() {
         setMessage("");
 
         try {
-            const res = await fetch(`/api/patients/conditions/by-name`, {
+            await authFetch(`${PATIENT_BASE}/api/patients/conditions/by-name`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-Auth": token,
                 },
                 body: JSON.stringify({
-                    patientName,      // <-- viktigt
+                    patientName,
                     code: diagCode,
                     display: diagDisplay,
-                    onsetDate: null,  // kan göras till ett datumfält senare
+                    onsetDate: null, // TODO: göra till datumfält om du vill
                 }),
             });
-            if (!res.ok) throw new Error(await res.text());
-            await res.json();
+
             setMessage("Diagnosis saved!");
             setDiagCode("");
             setDiagDisplay("");
