@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { authFetch, PATIENT_BASE } from "../api.js";
-
+import { authFetch } from "../api.js";
 export default function PatientNotesPage() {
     const [patientName, setPatientName] = useState("");
     const [noteText, setNoteText] = useState("");
@@ -15,7 +14,7 @@ export default function PatientNotesPage() {
         setMessage("");
 
         try {
-            await authFetch(`${PATIENT_BASE}/api/patients/notes/by-name`, {
+            await authFetch(`/api/patients/notes/by-name`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -39,7 +38,7 @@ export default function PatientNotesPage() {
         setMessage("");
 
         try {
-            await authFetch(`${PATIENT_BASE}/api/patients/conditions/by-name`, {
+            await authFetch(`/api/patients/conditions/by-name`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

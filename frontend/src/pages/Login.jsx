@@ -10,23 +10,29 @@ export default function Login({ onLogin, onShowRegister }) {
     async function handleSubmit(e) {
         e.preventDefault();
         setError("");
-        setLoading(true);
 
         try {
-            const data = await AuthApi.login({ username, password });
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password }),
+            });
 
-            // spara i localStorage som tidigare
+            if (!res.ok) {
+                throw new Error(await res.text());
+            }
+
+            const data = await res.json(); // { token, user }
+
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
 
-            onLogin(data.user);     // talar om för App.jsx att vi är inloggade
-            navigate("/");
+            onLogin(data.user);
         } catch (err) {
-            setError(err.message || "Inloggning misslyckades");
-        } finally {
-            setLoading(false);
+            setError(err.message || "Login failed");
         }
     }
+
 
 
     return (
