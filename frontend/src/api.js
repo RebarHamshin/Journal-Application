@@ -118,3 +118,42 @@ export const MessageApi = {
         });
     },
 };
+export const ImageApi = {
+    async list() {
+        return authFetch("/api/images");
+    },
+
+    async upload(file, patientId) {
+        const token = localStorage.getItem("token");
+        const formData = new FormData();
+        formData.append("file", file);
+        if (patientId) {
+            formData.append("patientId", patientId);
+        }
+
+        const headers = {};
+        if (token) {
+            headers["X-Auth"] = token;
+        }
+
+        const res = await fetch("/api/images", {
+            method: "POST",
+            headers,
+            body: formData,
+        });
+
+        if (!res.ok) {
+            throw new Error(await res.text());
+        }
+        return res.json();
+    },
+
+    getImageUrl(id) {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            return `/api/images/${id}`;
+        }
+        return `/api/images/${id}?token=${encodeURIComponent(token)}`;
+    },
+};
+

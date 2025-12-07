@@ -1,3 +1,4 @@
+// src/App.jsx
 import { useEffect, useState } from "react";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
@@ -6,11 +7,13 @@ import PatientNotesPage from "./pages/PatientNotes.jsx";
 import PatientRecordViewer from "./components/PatientRecordViewer.jsx";
 import MyJournal from "./components/MyJournal.jsx";
 import MessagesPage from "./pages/MessagesPage.jsx";
+// ⬇️ NY: sida för att jobba med bilder (du skapar den själv)
+import ImagePage from "./pages/ImagePage.jsx";
 
 export default function App() {
     const [me, setMe] = useState(null);
-    const [mode, setMode] = useState("login");   // 'login' | 'register'
-    const [view, setView] = useState("journal"); // 'journal' | 'messages'
+    const [mode, setMode] = useState("login");          // 'login' | 'register'
+    const [view, setView] = useState("journal");        // 'journal' | 'messages' | 'images'
 
     useEffect(() => {
         setMe(currentUser());
@@ -41,6 +44,7 @@ export default function App() {
                     >
                         Journal
                     </button>
+
                     <button
                         type="button"
                         onClick={() => setView("messages")}
@@ -48,6 +52,17 @@ export default function App() {
                     >
                         Meddelanden
                     </button>
+
+                    {/* ⬇️ Ny knapp för bild-vy.
+                        Om du vill kan du bara visa den för läkare/personal. */}
+                    <button
+                        type="button"
+                        onClick={() => setView("images")}
+                        style={{ fontWeight: view === "images" ? "bold" : "normal" }}
+                    >
+                        Bilder
+                    </button>
+
                     <button
                         type="button"
                         onClick={() => {
@@ -61,12 +76,13 @@ export default function App() {
                     </button>
                 </div>
             </header>
-            {view === "journal" ? (
+
+            {/* --- Main content beroende på vald vy --- */}
+            {view === "journal" && (
                 isDoctorOrStaff ? (
                     <>
                         {/* Läkare/personal: skriva noteringar/diagnoser */}
                         <PatientNotesPage />
-
                         {/* Läkare/personal: visa journal för valfri patient via namn */}
                         <PatientRecordViewer />
                     </>
@@ -76,9 +92,14 @@ export default function App() {
                         <MyJournal />
                     </>
                 )
-            ) : (
-                // Meddelandesida för alla roller
+            )}
+
+            {view === "messages" && (
                 <MessagesPage me={me} />
+            )}
+
+            {view === "images" && (
+                <ImagePage me={me} />
             )}
         </div>
     );

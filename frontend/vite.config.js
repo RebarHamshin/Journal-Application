@@ -18,7 +18,11 @@ export default defineConfig({
             '/api/messages': {
                 target: 'http://localhost:8083', // message-service
                 changeOrigin: true,
-            }
+            },
+            '/api/images': {
+                target: 'http://localhost:8084',
+                changeOrigin: true,
+            },
         },
     },
 });
