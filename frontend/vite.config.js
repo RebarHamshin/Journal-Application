@@ -23,6 +23,11 @@ export default defineConfig({
                 target: 'http://localhost:8084',
                 changeOrigin: true,
             },
+            '/api/search': {
+                target: 'http://localhost:8085',
+                changeOrigin: true,
+            },
+
         },
     },
 });

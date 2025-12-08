@@ -7,7 +7,7 @@ import PatientNotesPage from "./pages/PatientNotes.jsx";
 import PatientRecordViewer from "./components/PatientRecordViewer.jsx";
 import MyJournal from "./components/MyJournal.jsx";
 import MessagesPage from "./pages/MessagesPage.jsx";
-// ⬇️ NY: sida för att jobba med bilder (du skapar den själv)
+import SearchPage from "./pages/SearchPage.jsx";
 import ImagePage from "./pages/ImagePage.jsx";
 
 export default function App() {
@@ -53,8 +53,15 @@ export default function App() {
                         Meddelanden
                     </button>
 
-                    {/* ⬇️ Ny knapp för bild-vy.
-                        Om du vill kan du bara visa den för läkare/personal. */}
+                    <button
+                        type="button"
+                        onClick={() => setView("search")}
+                        style={{ fontWeight: view === "search" ? "bold" : "normal" }}
+                    >
+                        Sök
+                    </button>
+
+
                     <button
                         type="button"
                         onClick={() => setView("images")}
@@ -100,6 +107,9 @@ export default function App() {
 
             {view === "images" && (
                 <ImagePage me={me} />
+            )}
+            {view === "search" && (
+                <SearchPage />
             )}
         </div>
     );

@@ -3,6 +3,7 @@
 // Ingen localhost här – bara relativa vägar
 const API_BASE = "/api";
 
+
 // --- Session helpers ---
 
 export function currentUser() {
@@ -156,4 +157,25 @@ export const ImageApi = {
         return `/api/images/${id}?token=${encodeURIComponent(token)}`;
     },
 };
+export async function searchPatients(name) {
+    const token = localStorage.getItem("token");  // Changed from sessionStorage
+    const res = await fetch(`/api/search/patients?name=${encodeURIComponent(name)}`, {
+        headers: { "X-Auth": token },
+    });
+    if (!res.ok) {
+        throw new Error("Failed to search patients");
+    }
+    return res.json();
+}
+
+export async function searchByCondition(condition) {
+    const token = localStorage.getItem("token");  // Changed from sessionStorage
+    const res = await fetch(`/api/search/patients/by-diagnosis?condition=${encodeURIComponent(condition)}`, {
+        headers: { "X-Auth": token },
+    });
+    if (!res.ok) {
+        throw new Error("Failed to search diagnosis");
+    }
+    return res.json();
+}
 
